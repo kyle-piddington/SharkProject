@@ -6,6 +6,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "Transform.h"
+#include "Material.h"
 /**
  * An Assimp renderable model
  */

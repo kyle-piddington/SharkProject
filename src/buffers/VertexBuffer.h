@@ -61,7 +61,7 @@ public:
     */
    int getNumVerts (int floatsPerVert = 3) const
    {
-      return vertsLen / floatsPerVert;
+      return vertsLen;
    }
 
 

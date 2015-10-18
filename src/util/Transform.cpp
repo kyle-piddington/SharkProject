@@ -30,6 +30,11 @@ void Transform::setRotation(const glm::vec3 & eulerAngles)
    isDirty = true;
    updateFrame();
 }
+
+void Transform::setRotation(const glm::quat & quat)
+{
+   this->rotation = quat;
+}
 void Transform::setRotation(float angle, const glm::vec3 & axis)
 {
    //Assert axis greater than zero
@@ -145,6 +150,31 @@ void Transform::lookAt(glm::vec3 target, glm::vec3 upVec)
    Vector up = Vector::Cross(forward, right);*/
 
    glm::vec3 forward = glm::normalize(target-position);
+   glm::vec3 up = glm::orthonormalize(upVec, forward); // Keeps up the same, make forward orthogonal to up
+   glm::vec3 right = glm::normalize(glm::cross(forward, up));
+
+   glm::mat4 rotMat;
+   rotMat[0] = glm::vec4(right.x,right.y,right.z,0);
+   rotMat[1] = glm::vec4(up.x, up.y, up.z, 0);
+   rotMat[2] = glm::vec4(-forward.x, -forward.y, -forward.z, 0);
+   rotMat[3] = glm::vec4(0,0,0,1);
+   //Create a quaternion from the three vectors above.
+   glm::quat ret = glm::quat_cast(rotMat);
+
+
+   this->rotation = glm::normalize(ret);
+   isDirty = true;
+   updateFrame();
+
+
+
+}
+void Transform::lookAlong(glm::vec3 forward, glm::vec3 upVec)
+{
+   /*Vector forward = lookAt.Normalized();
+   Vector right = Vector::Cross(up.Normalized(), forward);
+   Vector up = Vector::Cross(forward, right);*/
+   
    glm::vec3 up = glm::orthonormalize(upVec, forward); // Keeps up the same, make forward orthogonal to up
    glm::vec3 right = glm::normalize(glm::cross(forward, up));
 

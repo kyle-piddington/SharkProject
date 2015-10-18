@@ -9,6 +9,7 @@ Model::Model(std::string path)
 }
 void Model::render(Program & prog)
 {
+
    for (std::vector<std::shared_ptr<Mesh> >::iterator mesh = meshes.begin(); mesh != meshes.end(); ++mesh)
    {
       (*mesh)->render(prog);
@@ -41,6 +42,7 @@ void Model::loadModel(std::string path)
 
 void Model::processNode(aiNode * node, const aiScene * scene)
 {
+
    for(GLuint i = 0; i < node->mNumMeshes; i++)
    {
       aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -105,7 +107,9 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh * mesh, const aiScene * scene)
       aiTextureType_SPECULAR,TextureType::SPECULAR);
    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-   return std::shared_ptr<Mesh>(new Mesh(vertices, indices, textures));
+   Material defaultMaterial(glm::vec3(0.0), glm::vec3(1.0), glm::vec3(1.0),32);
+
+   return std::shared_ptr<Mesh>(new Mesh(vertices, indices, textures, defaultMaterial));
 
 }
 

@@ -39,6 +39,14 @@ public:
     * @param axis  the axis to rotate on
     */
    void setRotation(float angle, const glm::vec3 & axis);
+
+   /**
+    * Set the rotation using a straight quaternion
+    * @param angle the angle
+    * @param axis  the axis to rotate on
+    */
+   void setRotation(const glm::quat & quaternion);
+
    /**
     * Move by a vector
     * @param pos the delta vector
@@ -62,6 +70,13 @@ public:
     * @param target the target position
     */
    void lookAt(glm::vec3 target,glm::vec3 up = World::Up);
+
+   /**
+    * Orient the transform to point along a vector
+    * @param forward the new forward vector
+    * @param up      the world's up direction.
+    */
+   void lookAlong(glm::vec3 forward, glm::vec3 up = World::Up);
 
    /**
     * Scale the transform

@@ -2,10 +2,12 @@
 #include "GL_Logger.h"
 Mesh::Mesh(std::vector<Vertex> vertices,
            std::vector<GLuint> indices,
-            std::vector<std::shared_ptr<Texture2D>> textures):
+            std::vector<std::shared_ptr<Texture2D>> textures,
+            Material material):
    vertices(vertices),
    indices(indices),
-   textures(textures)
+   textures(textures),
+   material(material)
    {
 
       setupMesh();
@@ -35,6 +37,10 @@ void Mesh::render(Program & program)
    Program::UniformArrayInfo diffuseTextures = program.getArray("diffuseTextures");
    Program::UniformArrayInfo specularTextures = program.getArray("specularTextures");
 
+   if(program.hasAddedUniform("material"))
+   {
+      material.bind(program.getUniformStruct("material"));
+   }
 
    for (std::vector<std::shared_ptr<Texture2D>>::iterator i = textures.begin(); i != textures.end(); ++i)
    {

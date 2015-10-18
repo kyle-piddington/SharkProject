@@ -458,7 +458,7 @@ bool Program::shouldProgramRecompile()
 
 bool Program::hasAddedUniform(std::string name)
 {
-   return(uniforms.find(name) != uniforms.end());
+   return(uniforms.find(name) != uniforms.end() || uniformStructs.find(name) != uniformStructs.end());
    
 }
 

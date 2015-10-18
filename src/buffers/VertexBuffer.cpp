@@ -33,7 +33,7 @@ void VertexBuffer::setData(const float * vertices, int size, GLenum usage)
       glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, vertices, usage);
       GL_Logger::LogError("Could not bind data to Vertex Buffer", glGetError());
       glBindBuffer(GL_ARRAY_BUFFER, 0);
-      vertsLen = size;
+      vertsLen = size/3;
    }
 }
 

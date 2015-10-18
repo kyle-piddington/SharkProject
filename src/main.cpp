@@ -10,21 +10,8 @@
 #include "GL_Logger.h"
 #include <GLFW/glfw3.h>
 #include "ErrorScene.h"
-#include "BoxScene.h"
 #include "AssimpScene.h"
-#include "OutlineScene.h"
-#include "BlendingScene.h"
-#include "PostProcessScene.h"
-#include "CubemapScene.h"
-#include "ShadowScene.h"
-#include "GeometryShaderScene.h"
-#include "VisualizeNormalsScene.h"
-#include "HDRScene.h"
-#include "BloomScene.h"
-#include "DeferredRenderScene.h"
-#include "NormalMapScene.h"
-#include "SSAOScene.h"
-#include "ParalaxMappingScene.h"
+
 INITIALIZE_EASYLOGGINGPP
 
 int main()
@@ -69,7 +56,7 @@ int main()
 
    Context * ctx = new Context(window);
    //Init scene of choice here
-   Scene * scene = new ParalaxMappingScene(ctx);
+   Scene * scene = new AssimpScene(ctx);
    scene->setContext(ctx);
 
    //Create a window for the program to run in
