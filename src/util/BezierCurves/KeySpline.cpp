@@ -118,7 +118,6 @@ void KeySpline::close(){
 
 Transform KeySpline::transformAt(float s){
     assert(numSplines > 0);
-    //Convert S to U through table lookup
     float kfloat;
     float uu = s;
     float u = std::modf(uu, &kfloat);

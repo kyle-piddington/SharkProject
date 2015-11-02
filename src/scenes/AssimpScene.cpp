@@ -8,11 +8,11 @@ AssimpScene::AssimpScene(Context * ctx):
    CameraScene(ctx),
    light1(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
    light2(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
-   mat(glm::vec3(0.0),glm::vec3(0.0),glm::vec3(0.0),0),
+   mat(glm::vec3(0.4),glm::vec3(0.0),glm::vec3(0.0),0),
    plane(3,3)
 
    {
-      model = new Model("assets/models/sharks/LeopardSharkTriangulated.obj");
+      model = new Model("assets/models/sharks/leopardShark.dae");
       assimpProg = createProgram("Assimp model viewer");
       camera.setPosition(glm::vec3(0,0,2));
       light1.transform.setPosition(glm::vec3(2.3f, -1.6f, -3.0f));
@@ -57,7 +57,7 @@ AssimpScene::~AssimpScene()
 }
 void AssimpScene::initPrograms()
 {
-   assimpProg->addVertexShader("assets/shaders/assimp_vert.vs");
+   assimpProg->addVertexShader("assets/shaders/skeleton/skel_vert.vs");
    assimpProg->addFragmentShader("assets/shaders/assimp_frag.fs");
 
    debugProg->addVertexShader("assets/shaders/debug_vert.vs");
@@ -66,11 +66,13 @@ void AssimpScene::initPrograms()
 
 void AssimpScene::initialBind()
 {
-   assimpProg->addUniform("MV");
+   assimpProg->addUniform("M");
+   assimpProg->addUniform("V");
    assimpProg->addUniform("P");
-   assimpProg->addUniform("N");
-
-
+   assimpProg->addUniformArray("gBones",100);
+   assimpProg->addUniformArray("gBinds",100);
+ 
+   debugProg->addUniform("M");
    debugProg->addUniform("V");
    debugProg->addUniform("P");
    debugProg->addUniform("debugColor");
@@ -127,22 +129,20 @@ void AssimpScene::render()
    GL_Logger::LogError("Any errors before enabling..", glGetError());
    assimpProg->enable();
    assimpProg->getUniform("P").bind(P);
-   assimpProg->getUniform("MV").bind(MV);
-   assimpProg->getUniform("N").bind(NORM);
+   assimpProg->getUniform("M").bind(M);
+   assimpProg->getUniform("V").bind(V);
    mat.bind(assimpProg->getUniformStruct("material"));
    model->render(*assimpProg);
-
-   M = plane.transform.getMatrix();
-   MV = V*M;
-   NORM = GlmUtil::createNormalMatrix(V, M);
-   assimpProg->getUniform("MV").bind(MV);
-   assimpProg->getUniform("N").bind(NORM);
-
-   plane.render();
    assimpProg->disable();
+
    debugProg->enable();
    debugProg->getUniform("V").bind(V);
+   debugProg->getUniform("M").bind(glm::mat4(1.0));
+   debugProg->getUniform("debugColor").bind(glm::vec3(0.8,0.0,0.0));
    keyspline.draw();
+   debugProg->getUniform("debugColor").bind(glm::vec3(0.8,0.8,0.8));
+   debugProg->getUniform("M").bind(plane.transform.getMatrix());
+   plane.render();
    debugProg->disable();
 
 }
@@ -162,6 +162,6 @@ void AssimpScene::update()
       }
    }
    model->transform = keyspline.transformAt(glfwGetTime());
-   model->transform.rotate(M_PI/2,glm::vec3(0,1,0),Space::LOCAL);
+
   
 }

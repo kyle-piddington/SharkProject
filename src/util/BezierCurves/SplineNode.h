@@ -8,6 +8,10 @@
 class SplineNode
 {
 public:
+   /**
+    * Create a spline node, with a position, and a rotation if
+    * interploation is needed of a model if needed.
+    */
     SplineNode(Eigen::Vector3f position, Eigen::Quaternionf rotation):
     position(position),
     rotation(rotation){};

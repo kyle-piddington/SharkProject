@@ -31,10 +31,6 @@ void Transform::setRotation(const glm::vec3 & eulerAngles)
    updateFrame();
 }
 
-void Transform::setRotation(const glm::quat & quat)
-{
-   this->rotation = quat;
-}
 void Transform::setRotation(float angle, const glm::vec3 & axis)
 {
    //Assert axis greater than zero
@@ -49,6 +45,13 @@ void Transform::setRotation(float angle, const glm::vec3 & axis)
 
    isDirty = true;
    //glm::normalize(this->rotation);
+   updateFrame();
+}
+
+void Transform::setRotation(const glm::quat & quat)
+{
+   this->rotation = quat;
+   isDirty = true;
    updateFrame();
 }
 
@@ -216,6 +219,10 @@ glm::vec3 Transform::forward() const
    return glm::vec3(localForward);
 }
 
+glm::vec3 Transform::getScale() const
+{
+   return scale;
+}
 void Transform::updateFrame()
 {
 

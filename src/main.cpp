@@ -9,8 +9,7 @@
 #include "AppleLiveReloadManager.h"
 #include "GL_Logger.h"
 #include <GLFW/glfw3.h>
-#include "ErrorScene.h"
-#include "AssimpScene.h"
+#include "scenes/Scenes.h"
 
 INITIALIZE_EASYLOGGINGPP
 

@@ -150,9 +150,17 @@ void GLSLParser::UniformObject::bind(const glm::mat4 & m) const
    }
 }
 
+bool GLSLParser::UniformObject::isValid()
+{
+   return id > -1;
+}
+
 GLint GLSLParser::UniformObject::getID() const
 {
    return id;
 }
 
-
+void GLSLParser::UniformObject::setID(GLint id)
+{
+   this->id = id;
+}

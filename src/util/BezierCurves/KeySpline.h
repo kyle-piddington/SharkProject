@@ -17,7 +17,7 @@ class KeySpline
 {
 
 public:
-
+    
     KeySpline();
     ~KeySpline();
     void setSplineType(SplineType type);

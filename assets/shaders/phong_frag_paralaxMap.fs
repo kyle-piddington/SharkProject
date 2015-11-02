@@ -34,14 +34,17 @@ uniform sampler2D normalMap;
 uniform sampler2D depthMap;
 uniform PointLight pointLight;
 
+uniform float iGlobalTime;
+uniform vec2 iWindowResolution;
 
-const float height_scale = 0.1;
 
 vec2 paralaxMapping(vec2 texCoords, vec3 viewDir)
 {
    // number of depth layers
     const float minLayers = 10;
     const float maxLayers = 20;
+    float height_scale = 0.2;
+
     float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
   // calculate the size of each layer
     float layerDepth = 1.0 / numLayers;
@@ -58,7 +61,7 @@ vec2 paralaxMapping(vec2 texCoords, vec3 viewDir)
     {
       currentTexCoords -= deltaTexCoords;
       // get depthmap value at current texture coordinates
-      currentDepthMapValue = texture(depthMap, currentTexCoords).r;  
+      currentDepthMapValue = texture(depthMap, currentTexCoords ).r;  
       // get depth of next layer
       currentLayerDepth += layerDepth;
     }
