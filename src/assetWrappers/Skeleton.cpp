@@ -13,7 +13,6 @@ parentBoneIdx(-1)
 }
 
 
-
 void Bone::setAnimatedTransform(glm::mat4 transform)
 {
    this->localAnimTransform = transform;

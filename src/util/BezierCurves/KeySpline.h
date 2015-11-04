@@ -26,21 +26,22 @@ public:
     void close(); //Close the spline.
 
     Transform transformAt(float s);
-    glm::vec3 normalAt(float s);
 private:
+    vector<pair<float,float> > usTable;
     std::vector<Eigen::Vector3f> nodePos;
     std::vector<Eigen::Quaternionf> nodeRot;
     Eigen::Matrix4f B;
-    std::vector< pair<float,float> > usTable;
     SplineType type;
     VertexArrayObject vao;
     VertexBuffer vertexBuffer;
+    bool usTableDirty;
     
     bool updateVBO = true;
     int numSplines;
 
-    void recalculateTable();
+    void recalculateTable(int discretization);
     float sToU(float s);
+
 
 };
 

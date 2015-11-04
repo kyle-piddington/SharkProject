@@ -6,6 +6,25 @@
 #include <glm/gtc/quaternion.hpp>
 #include <GLFW/glfw3.h>
 
+/**
+ * Calculate the lenght of a segment using a Gaussian Quadrature
+ * @param  u1 the first time point
+ * @param  u2 the second point of the segemnt
+ * @param  Gk 4 control poitns describing the spline
+ * @return    the length of the segment.
+ */
+float gaussQuad3(float u1, float u2, const Eigen::MatrixXf & Gk, const Eigen::Matrix4f & B){
+    float w[] = {5/9.0,8/9.0,5/9.0};
+    float x[] = {-sqrtf(3/5.0),0,sqrtf(3/5.0)};
+    float pointSummation = 0;
+    for(int i = 0; i < 3; i++){
+        float u = (u2-u1)/2.0 * x[i] + (u1 + u2)/2.0;
+        Eigen::Vector4f du;
+        du << 0,1,2*u,3*u*u;
+        pointSummation+= w[i]*(Gk*B*du).norm();
+    }
+    return pointSummation * (u2-u1)/2.0;
+}
 
 //Calculate the fernet frame of a point.
 glm::vec3 getNormalVector(const Eigen::Matrix4f & B, const Eigen::Vector3f points[],
@@ -25,7 +44,8 @@ glm::vec3 getNormalVector(const Eigen::Matrix4f & B, const Eigen::Vector3f point
 }
 
 KeySpline::KeySpline():
-numSplines(0)
+numSplines(0),
+usTableDirty(true)
 {
     setSplineType(BSPLINE);
     vao.addAttribute(0,vertexBuffer);
@@ -50,7 +70,7 @@ void KeySpline::setSplineType(SplineType t){
             break;
     }
     if(this->type != t){
-        recalculateTable();
+        recalculateTable(6);
         this->type = t;
     }
 }
@@ -62,7 +82,7 @@ void KeySpline::addNode(const SplineNode & node){
         numSplines++;
     }
     if(numSplines > 0){
-        recalculateTable();
+           recalculateTable(6);
     }
     updateVBO = true;
 }
@@ -118,8 +138,9 @@ void KeySpline::close(){
 
 Transform KeySpline::transformAt(float s){
     assert(numSplines > 0);
+
     float kfloat;
-    float uu = s;
+    float uu = sToU(std::fmod(s,usTable.back().second));
     float u = std::modf(uu, &kfloat);
     int k = (int)std::floor(kfloat) % numSplines;
     Eigen::MatrixXf GPos(3,4);
@@ -137,9 +158,54 @@ Transform KeySpline::transformAt(float s){
 }
 
 
+float KeySpline::sToU(float s)
+{
+    if(usTableDirty)
+    {
+        recalculateTable(6);
+        usTableDirty = false;
+    }
+    int i = 0;
+    float last = 0;
+    float cur = 0;
 
+    while( i < (int)usTable.size() && s >= cur){
+        i++;
+        last = cur;
+        cur = usTable[i].second;
+        
+    }
+    if(i == 0){
+        return 0;
+    }
+    float interpolationConst = (s-last)/(cur-last);
+    return (1-interpolationConst)*usTable[i-1].first + interpolationConst*usTable[i].first;
 
-void KeySpline::recalculateTable(){
+}
+
+void KeySpline::recalculateTable(int discretization){
+    usTable.clear();
+    int ncps = (int)nodePos.size();
+    Eigen::MatrixXf G(3,ncps);
+    Eigen::MatrixXf Gk(3,4);
+
+    usTable.push_back(std::make_pair(0.0f,0.0f));
+    float s = 0;
+    for(int i = 0; i < ncps; ++i) {
+            G.block<3,1>(0,i) = nodePos[i];
+    }
+    for(int k = 0; k < ncps - 3; ++k) {
+        int n = discretization; // table resolution discretization
+            // Gk is the 3x4 block starting at column k
+        Gk = G.block<3,4>(0,k);
+        for(int i = 0; i < n-1; ++i) {
+            float u = i / (n - 1.0f);
+            float u2 = u+1.0/(n - 1);
+                // Compute spline point at u
+            float ds = gaussQuad3(u, u2 , Gk, B);
+            usTable.push_back(std::make_pair(u2+k,(s+=ds)));
+        }
+    }
 
 }
 

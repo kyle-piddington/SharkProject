@@ -8,7 +8,7 @@ AssimpScene::AssimpScene(Context * ctx):
    CameraScene(ctx),
    light1(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
    light2(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
-   mat(glm::vec3(0.4),glm::vec3(0.0),glm::vec3(0.0),0),
+    mat(glm::vec3(0.4),glm::vec3(0.8),glm::vec3(0.4),16),
    plane(3,3)
 
    {
@@ -31,20 +31,13 @@ AssimpScene::AssimpScene(Context * ctx):
          SplineNode(Eigen::Vector3f(0,0,3),Eigen::Quaternionf::Identity()),
          SplineNode(Eigen::Vector3f(-3,0,3),Eigen::Quaternionf::Identity()),
          SplineNode(Eigen::Vector3f(-3,0,0),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(0,0,0),Eigen::Quaternionf::Identity()),
-      };
 
-      keyspline.addNode(nodes[0]);
-      keyspline.addNode(nodes[1]);
-      keyspline.addNode(nodes[2]);
-      keyspline.addNode(nodes[3]);
-      keyspline.addNode(nodes[4]);
-      keyspline.addNode(nodes[5]);
-      keyspline.addNode(nodes[6]);
-      keyspline.addNode(nodes[7]);
-      keyspline.addNode(nodes[8]);
-      keyspline.addNode(nodes[9]);
-      keyspline.addNode(nodes[10]);
+      };
+      for(int i = 0; i < 10; i++)
+      {
+         keyspline.addNode(nodes[i]);
+      }
+
 
         keyspline.close();
 
@@ -81,13 +74,13 @@ void AssimpScene::initialBind()
 
    assimpProg->addStructArray("pointLights",2,Light::getStruct());
    assimpProg->addUniform("numDiffuseTextures");
-
+   assimpProg->addUniformStruct("material", Material::getStruct());
    assimpProg->addUniformArray("specularTextures",2);
    assimpProg->addUniform("numSpecularTextures");
 
    assimpProg->addUniformStruct("material",Material::getStruct());
 
-   glClearColor(0.1,0.1,0.1,1.0);
+   glClearColor(1.0,1.0,1.0,1.0);
 
    assimpProg->enable();
    light1.bind(assimpProg->getStructArray("pointLights")[0]);
@@ -150,6 +143,7 @@ void AssimpScene::render()
 void AssimpScene::update()
 {
    CameraScene::update();
+   model->animate("",glfwGetTime() *6);
    if(Keyboard::key(GLFW_KEY_L))
    {
       if(Keyboard::isKeyToggled(GLFW_KEY_L))

@@ -77,6 +77,11 @@ class Bone{
       {
          return animTransform;
       }
+      glm::mat4 getLocalAnimMatrix()
+      {
+        return localAnimTransform;
+      }
+      
       /**
        * Determine if this bone is at the root of the heiarchy
        * @return True if the bone has no parent
