@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 3.0)
 
 project (GraphicsEngine)
 
+
+add_subdirectory(lib/imgui)
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -O3")
 option(test "Build all tests." ON) # Makes boolean 'test' available.
 
@@ -61,8 +64,11 @@ add_executable(GraphicsEngine ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 target_link_libraries(GraphicsEngine GraphicsEngine_lib)
 target_link_libraries(GraphicsEngine ${EXTRA_LIBS})
+#link imgui
+target_link_libraries(GraphicsEngine imgui)
 if (APPLE)
     target_link_libraries(GraphicsEngine "-framework OpenGL -framework CoreFoundation -framework CoreServices")
+
 endif()
 
 
@@ -94,6 +100,9 @@ if (test)
   # Extra linking for the project.
   target_link_libraries(GraphicsEngine_test GraphicsEngine_lib)
   target_link_libraries(GraphicsEngine_test ${EXTRA_LIBS})
+
+  #link imgui
+  target_link_libraries(GraphicsEngine_test imgui)
 
   #Add apple libs
   if (APPLE)

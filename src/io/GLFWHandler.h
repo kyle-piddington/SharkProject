@@ -38,6 +38,19 @@ struct GLFWHandler
     * Update any input handlers. (Mouse/Keyboard)
     */
    static void update();
+
+   /**
+    * Forward any scroll wheel changes to the application
+    * @param window  the sending window
+    * @param xoffset horizontal scrolling
+    * @param yoffset vertical scrolling
+    */
+   static void scrollWheelCallback(GLFWwindow * window, double xoffset, double yoffset);
+
+   /**
+    * Forward any character presses directly to the keyboard
+    */
+   static void characterCallback(GLFWwindow * window, unsigned int c);
 };
 
 

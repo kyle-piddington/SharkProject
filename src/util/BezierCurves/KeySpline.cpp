@@ -140,7 +140,7 @@ Transform KeySpline::transformAt(float s){
     assert(numSplines > 0);
 
     float kfloat;
-    float uu = sToU(std::fmod(s,usTable.back().second));
+    float uu = s;
     float u = std::modf(uu, &kfloat);
     int k = (int)std::floor(kfloat) % numSplines;
     Eigen::MatrixXf GPos(3,4);
@@ -160,6 +160,7 @@ Transform KeySpline::transformAt(float s){
 
 float KeySpline::sToU(float s)
 {
+    float sMod = std::fmod(s,usTable.back().second);
     if(usTableDirty)
     {
         recalculateTable(6);
@@ -169,7 +170,7 @@ float KeySpline::sToU(float s)
     float last = 0;
     float cur = 0;
 
-    while( i < (int)usTable.size() && s >= cur){
+    while( i < (int)usTable.size() && sMod >= cur){
         i++;
         last = cur;
         cur = usTable[i].second;
@@ -178,7 +179,7 @@ float KeySpline::sToU(float s)
     if(i == 0){
         return 0;
     }
-    float interpolationConst = (s-last)/(cur-last);
+    float interpolationConst = (sMod-last)/(cur-last);
     return (1-interpolationConst)*usTable[i-1].first + interpolationConst*usTable[i].first;
 
 }

@@ -4,6 +4,8 @@
 #include <easyLogging++.h>
 #include "ReloadLocator.h"
 #include "GLFWHandler.h"
+#include <imgui/imgui.h>
+#include "imgui_impl_glfw_gl3.h"
 
 Window::Window(GLFWwindow * window):
    currentWindow(window)
@@ -28,6 +30,7 @@ void Window::run()
 {
    if(currentScene != nullptr)
    {
+
       currentScene->initPrograms();
       currentScene->compilePrograms();
       if(currentScene->canRenderScene())
@@ -38,7 +41,7 @@ void Window::run()
       //While not esc pressed
       while(!glfwWindowShouldClose(currentWindow))
       {
-         //Check for any file changes
+         ImGui_ImplGlfwGL3_NewFrame();
          FileSystem::ReloadLocator::getService()->processEvents();
 
          //Poll and update any callbacks
@@ -64,12 +67,18 @@ void Window::run()
          {
             errorScene->render();
          }
+
+  
+         ImGui::Render();
+     
          glfwSwapBuffers(currentWindow);
+         
       }
    }
    else
    {
       LOG(ERROR) << "No scene loaded in window, exiting...";
    }
+
 
 }

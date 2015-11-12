@@ -10,6 +10,7 @@
 #include "Material.h"
 #include "Plane.h"
 #include "KeySpline.h"
+#include "SharkSpineOscilator.h"
 class AssimpScene : public CameraScene
 {
 public:
@@ -35,6 +36,7 @@ private:
    Material mat;
    Transform slidingTransform;
    KeySpline keyspline;
+   std::vector<SharkSpineOscilator> oscilators;
 
 };
 #endif

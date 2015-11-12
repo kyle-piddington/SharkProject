@@ -19,6 +19,7 @@ public:
    void render(Program & prog);
    void renderSkeleton();
    void animate(std::string animName, float time);
+   Bone * const getBone(std::string boneName);
    Transform transform;
 
 private:

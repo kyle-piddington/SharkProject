@@ -10,6 +10,8 @@
 #include "GL_Logger.h"
 #include <GLFW/glfw3.h>
 #include "scenes/Scenes.h"
+#include <imgui/imgui.h>
+#include "ui/imgui_impl_glfw_gl3.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -32,6 +34,8 @@ int main()
       glfwTerminate();
       return -1;
    }
+   
+
    glfwMakeContextCurrent(window);
    int width, height;
    glfwGetFramebufferSize(window, &width, &height);
@@ -45,9 +49,13 @@ int main()
    }
    GL_Logger::LogError("Error in GLEW startup (Safe to ignore)", glGetError());
 
+   ImGui_ImplGlfwGL3_Init(window,false); //Initialize ImGui
+
+
    glfwSetKeyCallback(window, GLFWHandler::key_callback);
    glfwSetCursorPosCallback(window, GLFWHandler::mousePositionCallback);
    glfwSetMouseButtonCallback(window, GLFWHandler::mouseButtonCallback);
+   glfwSetScrollCallback(window, GLFWHandler::scrollWheelCallback);
 
    FileSystem::ReloadLocator::Initialize();
    FileSystem::ReloadLocator::provide(new AppleReloadManager());
@@ -63,6 +71,8 @@ int main()
 
    renderWindow.loadScene(scene);
    renderWindow.run();
+
+   ImGui::Shutdown();
 
    delete scene;
    delete ctx;

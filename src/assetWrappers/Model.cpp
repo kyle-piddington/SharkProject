@@ -222,6 +222,7 @@ void Model::animate(std::string animName, float time)
       LOG(WARNING) << "Could not find animation named " << animName;
    }
    */
+  /*
    for(int i = 5; i <= 8; i++)
    {
       Bone * const bonePtr = skeleton.getBone("Spine" + std::to_string(i));
@@ -229,7 +230,13 @@ void Model::animate(std::string animName, float time)
       t.setRotation(sin(time)/5, glm::vec3(1,0,0));
       bonePtr->setAnimatedTransform(bonePtr->getOffsetMatrix() * t.getMatrix());
    }
+   */
    //Update the bone heiearchy after setting all of the animated transforms.
    skeleton.finalizeAnimation();
 
+}
+
+Bone * const Model::getBone(std::string boneName)
+{
+   return skeleton.getBone(boneName);
 }

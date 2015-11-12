@@ -3,7 +3,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "GlmUtil.h"
 #include "KeySpline.h"
-
+#include "SharkSpineOscilator.h"
 AssimpScene::AssimpScene(Context * ctx):
    CameraScene(ctx),
    light1(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
@@ -22,24 +22,25 @@ AssimpScene::AssimpScene(Context * ctx):
       q1 =  Eigen::AngleAxisf(90.0f/180.0f*M_PI, Eigen::Vector3f(1,0,0)) * q1;
       SplineNode nodes[] = {
          SplineNode(Eigen::Vector3f(0,0,0),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(5,2,0),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(9,0,0),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(9+3,0,0),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(9+3,0,3),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(9,0,3),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(4,-2,3),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(0,0,3),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(-3,0,3),Eigen::Quaternionf::Identity()),
-         SplineNode(Eigen::Vector3f(-3,0,0),Eigen::Quaternionf::Identity()),
-
+         SplineNode(Eigen::Vector3f(0,0,0),Eigen::Quaternionf::Identity()),
+         SplineNode(Eigen::Vector3f(3,3,0),Eigen::Quaternionf::Identity()),
+         
+         SplineNode(Eigen::Vector3f(3.25,3,0),Eigen::Quaternionf::Identity()),
+         SplineNode(Eigen::Vector3f(7,0,0),Eigen::Quaternionf::Identity()),
+         SplineNode(Eigen::Vector3f(7,0,0),Eigen::Quaternionf::Identity()),
       };
-      for(int i = 0; i < 10; i++)
+      for(int i = 0; i < 6; i++)
       {
          keyspline.addNode(nodes[i]);
       }
 
+      for(int i = 1; i <= 8; i++)
+      {
+         SharkSpineOscilator osc("Spine" + std::to_string(i));
+         oscilators.push_back(osc);
+      }
 
-        keyspline.close();
+        //keyspline.close();
 
       debugProg = createProgram("Debug spline view program");
    }
@@ -143,7 +144,12 @@ void AssimpScene::render()
 void AssimpScene::update()
 {
    CameraScene::update();
-   model->animate("",glfwGetTime() *6);
+   for (std::vector<SharkSpineOscilator>::iterator osc = oscilators.begin(); osc != oscilators.end(); ++osc)
+   {
+      osc->update(1/30.0f);
+      osc->apply(*model);
+   }
+   model->animate("Dothething",0.0);
    if(Keyboard::key(GLFW_KEY_L))
    {
       if(Keyboard::isKeyToggled(GLFW_KEY_L))
@@ -155,7 +161,12 @@ void AssimpScene::update()
          glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
       }
    }
-   model->transform = keyspline.transformAt(glfwGetTime());
+   float u = glfwGetTime();
+   if(Keyboard::isKeyToggled(GLFW_KEY_I))
+   {
+      u = keyspline.sToU(u);
+   }
+   //model->transform = keyspline.transformAt(u);
 
   
 }

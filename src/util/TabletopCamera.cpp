@@ -2,13 +2,14 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include <glm/gtx/rotate_vector.hpp>//GLM_GTX_rotate_vector
+#include <iostream>
 TabletopCamera::TabletopCamera(float w, float h):
    Camera(w,h),
    phi(0),
    theta(0),
    radius(3),
    Cam_Rot_Speed(2*M_PI),
-   Cam_Zoom_Speed(3.0)
+   Cam_Zoom_Speed(0.25)
    {
       transform.setParent(&centerPoint);
    }
@@ -32,7 +33,9 @@ void TabletopCamera::update(const Context * ctx)
          rotate.z = 0;
       }
 
+
    }
+   radius += Mouse::getScrollYDelta() * Cam_Zoom_Speed;
    centerPoint.setRotation(glm::vec3(phi,theta,0.0));
    setPosition(glm::vec3(0,0,radius));
 }
@@ -42,7 +45,6 @@ void TabletopCamera::rotate(float dPhi, float dTheta)
    phi += dPhi;
    theta += dTheta;
    centerPoint.setRotation(glm::vec3(phi,theta,0.0));
-
 }
 
 

@@ -24,6 +24,7 @@ public:
     void addNode(const SplineNode & node);
     void draw();
     void close(); //Close the spline.
+    float sToU(float s);
 
     Transform transformAt(float s);
 private:
@@ -40,7 +41,6 @@ private:
     int numSplines;
 
     void recalculateTable(int discretization);
-    float sToU(float s);
 
 
 };
