@@ -67,11 +67,7 @@ void GLFWHandler::scrollWheelCallback(GLFWwindow * window, double xOffset, doubl
 
 void GLFWHandler::characterCallback(GLFWwindow * window, unsigned int c)
 {
-   if(ImGui::IsWindowFocused() || ImGui::IsMouseHoveringAnyWindow())
-   {
-      ImGui_ImplGlfwGL3_CharCallback(window, c);
-   }
-
+   ImGui_ImplGlfwGL3_CharCallback(window, c);
 }
 
 

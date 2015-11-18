@@ -47,7 +47,7 @@ KeySpline::KeySpline():
 numSplines(0),
 usTableDirty(true)
 {
-    setSplineType(BSPLINE);
+    setSplineType(CATMULL);
     vao.addAttribute(0,vertexBuffer);
 };
 KeySpline::~KeySpline(){};
@@ -78,7 +78,8 @@ void KeySpline::setSplineType(SplineType t){
 void KeySpline::addNode(const SplineNode & node){
     nodePos.push_back(node.getPosition());
     nodeRot.push_back(node.getRotation());
-    if(nodePos.size() >= 4){
+    if(nodePos.size() >= 3){
+        std::cout << "Increasing splines" << std::endl;
         numSplines++;
     }
     if(numSplines > 0){
@@ -91,11 +92,12 @@ void KeySpline::addNode(const SplineNode & node){
 void KeySpline::draw(){
     if(updateVBO && numSplines > 0){
 
-        Eigen::MatrixXf G(3,nodePos.size());
+        Eigen::MatrixXf G(3,nodePos.size() + 1);
         Eigen::MatrixXf Gk(3,4);
         for(int i = 0; i < nodePos.size(); i++){
             G.block<3,1>(0,i) = nodePos[i];
         }
+        G.block<3,1>(0,nodePos.size()) = nodePos.back();
         std::vector<glm::vec3>  positions;
         positions.clear();
         for(int k = 0; k < numSplines; k++){
@@ -145,15 +147,16 @@ Transform KeySpline::transformAt(float s){
     int k = (int)std::floor(kfloat) % numSplines;
     Eigen::MatrixXf GPos(3,4);
     Eigen::MatrixXf GRot(4,4);
-
+    std::vector<Eigen::Vector3f> cappedPos(nodePos);
+    cappedPos.push_back(nodePos.back());
     for(int i = 0; i < 4; i++){
-        GPos.block<3,1>(0,i) = nodePos[k+i];
+        GPos.block<3,1>(0,i) = cappedPos[k+i];
     }
     Eigen::Vector4f uVec(1.0,u,u*u,u*u*u);
     Eigen::Vector3f P= GPos * B * uVec;
     Transform t;
     t.setPosition(glm::vec3(P(0),P(1),P(2)));
-    t.lookAlong(getNormalVector(B,&(nodePos[k]),u));
+    t.lookAlong(getNormalVector(B,&(cappedPos[k]),u));
     return t;
 }
 
@@ -185,9 +188,11 @@ float KeySpline::sToU(float s)
 }
 
 void KeySpline::recalculateTable(int discretization){
+    if(numSplines == 0)
+        return;
     usTable.clear();
     int ncps = (int)nodePos.size();
-    Eigen::MatrixXf G(3,ncps);
+    Eigen::MatrixXf G(3,ncps + 1);
     Eigen::MatrixXf Gk(3,4);
 
     usTable.push_back(std::make_pair(0.0f,0.0f));
@@ -195,6 +200,9 @@ void KeySpline::recalculateTable(int discretization){
     for(int i = 0; i < ncps; ++i) {
             G.block<3,1>(0,i) = nodePos[i];
     }
+    //assign last node duplicate to cap the spline
+    G.block<3,1>(0,ncps) = nodePos.back();
+    ncps++;
     for(int k = 0; k < ncps - 3; ++k) {
         int n = discretization; // table resolution discretization
             // Gk is the 3x4 block starting at column k
@@ -208,6 +216,11 @@ void KeySpline::recalculateTable(int discretization){
         }
     }
 
+}
+
+int KeySpline::getNumNodes()
+{
+    return nodePos.size();
 }
 
 

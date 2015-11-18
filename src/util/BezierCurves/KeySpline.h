@@ -25,6 +25,7 @@ public:
     void draw();
     void close(); //Close the spline.
     float sToU(float s);
+    int getNumNodes();
 
     Transform transformAt(float s);
 private:

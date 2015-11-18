@@ -56,6 +56,7 @@ int main()
    glfwSetCursorPosCallback(window, GLFWHandler::mousePositionCallback);
    glfwSetMouseButtonCallback(window, GLFWHandler::mouseButtonCallback);
    glfwSetScrollCallback(window, GLFWHandler::scrollWheelCallback);
+   glfwSetCharCallback(window,GLFWHandler::characterCallback);
 
    FileSystem::ReloadLocator::Initialize();
    FileSystem::ReloadLocator::provide(new AppleReloadManager());

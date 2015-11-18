@@ -29,14 +29,19 @@ private:
    Light light1, light2;
    Model * model;
    Program * assimpProg;
+   Program * texProg;
    Program * debugProg;
+
    Plane plane;
    Cube cube;
+   Texture2D gridTexture;
    glm::mat3 createNormalMatrix(const glm::mat4 & view, const glm::mat4 & model);
    Material mat;
    Transform slidingTransform;
    KeySpline keyspline;
    std::vector<SharkSpineOscilator> oscilators;
+
+   float u = 0;
 
 };
 #endif

@@ -105,15 +105,15 @@ public:
    /**
     * Get the local up facing vector
     */
-   glm::vec3 up() const;
+   glm::vec3 up(Space::spaceType space = Space::LOCAL) const;
    /**
     * Get the local right facing vector
     */
-   glm::vec3 right() const;
+   glm::vec3 right(Space::spaceType space = Space::LOCAL) const;
    /**
     * Get the local forward facing vector
     */
-   glm::vec3 forward() const;
+   glm::vec3 forward(Space::spaceType space = Space::LOCAL) const;
 
    void setParent(Transform * parent)
    {

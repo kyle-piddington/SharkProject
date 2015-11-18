@@ -42,13 +42,15 @@ void Window::run()
       while(!glfwWindowShouldClose(currentWindow))
       {
          ImGui_ImplGlfwGL3_NewFrame();
+        
          FileSystem::ReloadLocator::getService()->processEvents();
-
          //Poll and update any callbacks
          glfwPollEvents();
+
          //Update the input handler
          GLFWHandler::update();
-
+         //ImGui::ShowTestWindow();
+         
          if(currentScene->shouldReloadScene())
          {
             if(currentScene->compilePrograms())

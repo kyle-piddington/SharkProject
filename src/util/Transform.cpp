@@ -204,19 +204,34 @@ void Transform::setScale(glm::vec3 scale)
    isDirty = true;
 }
 
-glm::vec3 Transform::up() const
+glm::vec3 Transform::up(Space::spaceType type) const
 {
-   return glm::vec3(localUp);
+   glm::vec3 vec =  glm::vec3(localUp);
+   if(type == Space::WORLD)
+   {
+      vec = glm::vec3(parent->getMatrix() * glm::vec4(vec,0.0));
+   }
+   return vec;
 }
 
-glm::vec3 Transform::right() const
+glm::vec3 Transform::right(Space::spaceType type) const
 {
-   return glm::vec3(localRight);
+   glm::vec3 vec =  glm::vec3(localRight);
+   if(type == Space::WORLD)
+   {
+      vec = glm::vec3(parent->getMatrix() * glm::vec4(vec,0.0));
+   }
+   return vec;
 }
 
-glm::vec3 Transform::forward() const
+glm::vec3 Transform::forward(Space::spaceType type) const
 {
-   return glm::vec3(localForward);
+   glm::vec3 vec =  glm::vec3(localForward);
+   if(type == Space::WORLD)
+   {
+      vec = glm::vec3(parent->getMatrix() * glm::vec4(vec,0.0));
+   }
+   return vec;
 }
 
 glm::vec3 Transform::getScale() const
