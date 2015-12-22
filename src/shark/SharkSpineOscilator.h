@@ -12,9 +12,10 @@ public:
    void apply(Model & model);
    void update(float dt);
    void setAlpha(float newAlpha);
-   void setDTau(float newTau);
+   void setHz(float newTau);
    void setTau(float tau);
    void setPhase(float phase);
+   void setHarmonic(int harmonic);
    void handleGUI();
    int getID();
 private:
@@ -26,6 +27,7 @@ private:
    float alpha;
    float tau;
    float phase, targPhase;
+   int harmonic = 1;
 
 };
 #endif

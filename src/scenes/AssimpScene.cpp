@@ -5,6 +5,64 @@
 #include "KeySpline.h"
 #include "SharkSpineOscilator.h"
 #include <imgui/imgui.h>
+
+//Max speed is 1 m/sec
+float getMaxSpeed()
+{
+   return 1;
+}
+float getMinSpeed()
+{
+   return 0.2;
+}
+
+float getFrequency(float length, float speed)
+{
+   float minHz;
+   float maxHz;
+   if(length < 60)
+   {
+      minHz = 1.25;
+      maxHz = 2.25;
+   }
+   else if(length < 90)
+   {
+      minHz = 1.0;
+      maxHz = 1.75;
+   }
+   else
+   {
+      minHz = 0.75;
+      maxHz = 1.20;
+   }
+   return minHz + (maxHz - minHz) * (speed - getMinSpeed()) / (getMaxSpeed() - getMinSpeed());
+
+}
+float getAmplitude(float length, float speed)
+{
+   float minHz;
+   float maxHz;
+   if(length < 60)
+   {
+      minHz = 1.25;
+      maxHz = 2.25;
+   }
+   else if(length < 90)
+   {
+      minHz = 1.0;
+      maxHz = 1.75;
+   }
+   else
+   {
+      minHz = 0.75;
+      maxHz = 1.20;
+   }
+   //Aimplitude of oscilation is based off of full spine, not just one section
+   float maxA = length/(5*2);
+   return maxA * (getFrequency(length, speed) - minHz)/(maxHz - minHz);
+
+}
+
 AssimpScene::AssimpScene(Context * ctx):
    CameraScene(ctx),
    light1(glm::vec3(0.05),glm::vec3(1.0),glm::vec3(1.0),50),
@@ -14,7 +72,9 @@ AssimpScene::AssimpScene(Context * ctx):
    gridTexture("assets/textures/Grid.png")
 
    {
-      model = new Model("assets/models/sharks/leopardShark.dae");
+      model = new Model("assets/models/sharks/leopardShark2.dae");
+
+
       assimpProg = createProgram("Assimp model viewer");
       camera.setPosition(glm::vec3(0,0,2));
       light1.transform.setPosition(glm::vec3(2.3f, -1.6f, -3.0f));
@@ -27,8 +87,19 @@ AssimpScene::AssimpScene(Context * ctx):
       {
          SharkSpineOscilator osc("Spine" + std::to_string(i),i);
          osc.setPhase(-M_PI/9*i);
+         osc.setAlpha(0.15/9. * (i < 3 ? 1.5 : i)); //Model Subcarangiform motion by osiclating the last 2/3 more than the first
+         if(i > 5)
+         {
+            //osc.setHarmonic(i-5); //Set harmonics for spine
+         }
          oscilators.push_back(osc);
+
       }
+      //Fake Spine0 to move head of shark
+      SharkSpineOscilator osc0("Spine0",0);
+      osc0.setPhase(0);
+      osc0.setAlpha(0.07);
+      oscilators.push_back(osc0);
       plane.transform.setScale(glm::vec3(30));
       plane.transform.translate(glm::vec3(0,-0.2,0));
         //keyspline.close();
@@ -145,7 +216,7 @@ void AssimpScene::render()
    texProg->getUniform("M").bind(plane.transform.getMatrix());
    plane.render();
    texProg->disable();
-  
+
    debugProg->enable();
    debugProg->getUniform("V").bind(V);
    debugProg->getUniform("M").bind(glm::mat4(1.0));
@@ -158,9 +229,15 @@ void AssimpScene::render()
 
 void AssimpScene::update()
 {
+   static float length = 100;
+   float newT = glfwGetTime();
+   float dt = newT - oldT;
+   oldT = newT;
    CameraScene::update();
 
-   ImGui::Begin("Bones");
+   ImGui::Begin("Shark");
+   ImGui::SliderFloat("length (cm)", &length,  30,  121, "%.3f",  1.0f);
+
    if(ImGui::Button("Sync"))
    {
       for (std::vector<SharkSpineOscilator>::iterator i = oscilators.begin(); i != oscilators.end(); ++i)
@@ -169,6 +246,8 @@ void AssimpScene::update()
       }
    }
    ImGui::End();
+   //
+   model->transform.setScale(glm::vec3(length/100.f/model->getWidth()));
    model->animate("Dothething",0.0);
    if(Keyboard::key(GLFW_KEY_L))
    {
@@ -181,47 +260,54 @@ void AssimpScene::update()
          glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
       }
    }
+
+   ImGui::Begin("Movement");
+   {
+      static float targSpeed = 1.0;
+      static float speed = 1.0;
+      ImGui::InputFloat("Speed", &targSpeed,0.01f,1.0f);
+      float maxSpeed = getMaxSpeed();
+         //Clamp the target speed value
+      targSpeed = min(getMaxSpeed(),targSpeed);
+      targSpeed = max(getMinSpeed(),targSpeed);
+
+      float accel = (targSpeed - speed) * dt;
+
+      speed+= accel;
+         //Set Frequency and Amplitude from speed
+         //Calculate velocity Shark is appx 120 cm
+      float freq = getFrequency(length, speed);
+      float ampl = getAmplitude(length, speed)/100.f;
+
+      for (std::vector<SharkSpineOscilator>::iterator osc = oscilators.begin(); osc != oscilators.end(); ++osc)
+      {
+            osc->setHz(freq);//Oscilating frequency function of Shark len and speed
+            osc->setAlpha(ampl * (osc->getID() < 4 ? 0.7f :  1)); //Model Subcarangiform motion by osiclating the last 2/3 more than the first
+         }
+         //Set "Spine0" alpha back to base
+         oscilators.back().setAlpha(ampl);
+         u += dt * speed;
+
+
+   }
+   ImGui::End();
    if(keyspline.getNumNodes() >= 3)
    {
-      //float u;
-      ImGui::Begin("Movement");
-      {
-         static float targSpeed = 1.0;
-         static float speed = 1.0;
-         ImGui::InputFloat("Speed", &targSpeed,0.01f,1.0f);
-         //0.016 = dt;
-         float accel = (targSpeed - speed) * 1/30.0f;
-         speed+= accel;
-         for (std::vector<SharkSpineOscilator>::iterator osc = oscilators.begin(); osc != oscilators.end(); ++osc)
-         {
-            osc->setDTau(log(max(2.718f,30*accel)) + speed*0.75);
-            if(osc->getID() > 5)
-            {
-               osc->setAlpha((30*accel + 0.15*speed + 0.15)*0.15);
-            }
-            else if(osc->getID() <=3)
-            {
-               osc->setAlpha(-(sqrt(max(0.f,accel)) + 0.15)/5.0);
-            }
 
-         }
-         u += 1/30.0 * speed;
-
-
-      }
-      ImGui::End();      
       float stepU = u;
       stepU = keyspline.sToU(stepU);
-      model->transform = keyspline.transformAt(stepU);
+      Transform tns = keyspline.transformAt(stepU);
+      model->transform.setPosition(tns.getPosition());
+      model->transform.setRotation(tns.getRotation());
    }
-   
+
    for (std::vector<SharkSpineOscilator>::iterator osc = oscilators.begin(); osc != oscilators.end(); ++osc)
    {
       osc->handleGUI();
-      osc->update(1/30.0f);
+      osc->update(dt);
       osc->apply(*model);
    }
- 
+
 
    if(Mouse::clicked(GLFW_MOUSE_BUTTON_LEFT) && Keyboard::isKeyDown(GLFW_KEY_LEFT_SHIFT))
    {
@@ -239,7 +325,7 @@ void AssimpScene::update()
       //Intersect with XZ plane
       glm::vec3 normal(0,1,0);
       std::cout << "Cast direction:"  << direction.x <<"," << direction.y << "," << direction.z<< std::endl;
-     
+
       float t = glm::dot(-origin, normal) / glm::dot(direction, normal);
       if(t > 0.001)
       {
@@ -250,9 +336,9 @@ void AssimpScene::update()
             keyspline.addNode(SplineNode(hit_point,glm::quat()));
          }
          keyspline.addNode(SplineNode(hit_point,glm::quat()));
-  
+
       }
-    
+
 
 
    }

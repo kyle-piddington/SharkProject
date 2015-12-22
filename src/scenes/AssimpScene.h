@@ -42,6 +42,7 @@ private:
    std::vector<SharkSpineOscilator> oscilators;
 
    float u = 0;
+   float oldT = 0, newT = 0;
 
 };
 #endif

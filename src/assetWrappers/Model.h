@@ -20,11 +20,16 @@ public:
    void renderSkeleton();
    void animate(std::string animName, float time);
    Bone * const getBone(std::string boneName);
+   float getWidth(){return maxBounds.x - minBounds.x;}
+   float getHeight(){return maxBounds.y - minBounds.y;}
+   float getLength(){return maxBounds.z - minBounds.z;};
    Transform transform;
 
 private:
    std::vector< std::shared_ptr<Mesh> > meshes;
    std::string directory;
+   glm::vec3 minBounds;
+   glm::vec3 maxBounds;
    void loadModel(std::string path);
    void loadBones(aiNode * node);
    void processNode(aiNode * node, const aiScene * scene);

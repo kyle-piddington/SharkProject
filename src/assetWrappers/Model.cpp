@@ -4,7 +4,9 @@
 #include <glm/gtc/type_ptr.hpp>
 
 Model::Model(std::string path):
-skelRenderer(skeleton)
+skelRenderer(skeleton),
+minBounds(0),
+maxBounds(0)
 {
    loadModel(path);
 }
@@ -52,6 +54,7 @@ void Model::loadModel(std::string path)
          std::cout << "Adding animation " << anim.getAnimationName() << std::endl;
          animations[anim.getAnimationName()] = anim;
       }
+
    }
 
 
@@ -134,6 +137,14 @@ std::shared_ptr<Mesh> Model::processMesh(aiMesh * mesh, const aiScene * scene)
       {
          vertex.texCoords = glm::vec2(0.0);
       }
+      //Update bounding box on the model
+      this->minBounds.x = (float)fmin(vector.x, minBounds.x);
+      this->minBounds.y = (float)fmin(vector.y, minBounds.y);
+      this->minBounds.z = (float)fmin(vector.z, minBounds.z);
+      this->maxBounds.x = (float)fmax(vector.x, maxBounds.x);
+      this->maxBounds.y = (float)fmax(vector.y, maxBounds.y);
+      this->maxBounds.z = (float)fmax(vector.z, maxBounds.z);
+      
       vertices.push_back(vertex);
 
    }

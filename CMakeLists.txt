@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 
 project (GraphicsEngine)
-
+include_directories("usr/local/include")
 
 add_subdirectory(lib/imgui)
 
